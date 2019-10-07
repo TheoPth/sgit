@@ -10,8 +10,12 @@ object Add {
     Add fonc save diff between WD and last commit
    */
 
-  def add(args: String, dirAct: File) : Unit = {
+  def add(args: Seq[String], dirAct: File) : Unit = {
     val pathToSgit = MoveDir.findRelativePathSgit(dirAct.path);
+
+    val relativesPath = getRelativePathFromRegexOrNames(args, pathToSgit)
+
+
 
     // All files selected in the args
     //val files =

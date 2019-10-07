@@ -69,12 +69,44 @@ class AddTest extends FunSuite {
 
     File (dirTestPath + "/hello/hello.txt").createIfNotExists().overwrite("hello")
 
-    val files = Add.getRelativePathFromRegexOrNames(Seq("hello/*.txt"), dirTest)
+    val files = Add.getRelativePathFromRegexOrNames(Seq("hello/hello.txt"), dirTest)
 
     dirTest.delete()
 
     assert(files.length == 1)
     assert(files === Seq(Paths.get("hello/hello.txt")))
+  }
+
+  test ("getRelativePathFromRegexOrNames - find several file with name in several directory") {
+    val dirTestPath = System.getProperty("user.dir") + "/../TestgetFilesSelected";
+    val dirTest = File (dirTestPath).createIfNotExists(true)
+    File (dirTestPath + "/hello").createIfNotExists(true)
+    File (dirTestPath + "/hello2").createIfNotExists(true)
+
+    File (dirTestPath + "/hello/hello.txt").createIfNotExists().overwrite("hello")
+    File (dirTestPath + "/hello2/hello2.txt").createIfNotExists().overwrite("hello")
+
+    val files = Add.getRelativePathFromRegexOrNames(Seq("hello/hello.txt", "hello2/hello2.txt"), dirTest)
+
+    dirTest.delete()
+
+    assert(files.length == 2)
+    assert(files === Seq(Paths.get("hello/hello.txt"), Paths.get("hello2/hello2.txt")))
+  }
+
+  test ("getRelativePathFromRegexOrNames - select dir from name ") {
+    val dirTestPath = System.getProperty("user.dir") + "/../TestgetFilesSelected";
+    val dirTest = File (dirTestPath).createIfNotExists(true)
+    File (dirTestPath + "/hello").createIfNotExists(true)
+
+    File (dirTestPath + "/hello/hello.txt").createIfNotExists().overwrite("hello")
+
+    val files = Add.getRelativePathFromRegexOrNames(Seq("hello"), dirTest)
+
+    dirTest.delete()
+
+    assert(files.length == 1)
+    assert(files === Seq(Paths.get("hello") ))
   }
 
 }

@@ -42,19 +42,19 @@ object Difference {
     return aux(text1, text2, Seq(), 0);
   }
 
-  /*
-    Compute diff between two directories (only file deleted and modified)
-  */
 
+  /*
+    Compute wich files are added or modify between dir1 and dir2 recursively
+     */
   def diffDirectories(dir1 : File, dir2 : File): Seq[DifferenceDir] = {
     val res1 = diffDirectoriesAddModify(dir1, dir2)
     val res2 = diffDirectoriesAddModify(dir2, dir1)
-    return concatDirDiff(res1, res2)
+    computeDirDiff(res1, res2)
   }
 
   /*
-  Compute wich files are added or modify between dir1 and dir2 recursively
-   */
+    Compute diffs between two directories (only file deleted and modified)
+  */
   def diffDirectoriesAddModify (dir1 : File, dir2 : File): Seq[DifferenceDir] = {
     val pathDir1 = dir1.path
     val pathDir2 = dir2.path
@@ -88,11 +88,17 @@ object Difference {
         return aux (d1.tail) :+ DifferenceDir(pathRelatif.toString, DiffEnum.MODIFY)
       }
     }
-    return aux(dir1.children.toSeq)
+
+    if (dir1.isDirectory) {
+      aux(dir1.children.toSeq)
+    } else {
+      aux (Seq(dir1))
+    }
+
   }
 
   // Add the delete file from diffs1 to diffs2 (Added file in diffs2 are deleted files in diffs1)
-  def concatDirDiff(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
+  def computeDirDiff(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
     def aux (v2: Seq[DifferenceDir]) : Seq [DifferenceDir] = {
       if (!v2.isEmpty) {
         if (v2.head.diff == DiffEnum.DELETE) {
@@ -105,6 +111,20 @@ object Difference {
       }
     }
     return diffs1 ++ aux(diffs2)
+  }
+
+  // Concat two Seqs of dirDiff and delete redondants7 dirDiffs
+  def unionDirDiff(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
+
+    def aux(dd1: Seq[DifferenceDir], acc : Seq[DifferenceDir]): Seq[DifferenceDir] = {
+      if (dd1.isEmpty) {
+        acc ++ diffs2
+      } else {
+        if (!diffs2.contains(dd1.head)) aux(dd1.tail, acc :+ dd1.head) else aux(dd1.tail, acc)
+      }
+    }
+
+    aux(diffs1, Seq())
   }
 
   // Compute the difference between to Seq of difference (diffs1 = WD and diffs2 = SA

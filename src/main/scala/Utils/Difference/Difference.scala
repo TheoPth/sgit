@@ -52,15 +52,22 @@ object Difference {
     return concatDirDiff(res1, res2)
   }
 
+  /*
+  Compute wich files are added or modify between dir1 and dir2 recursively
+   */
   def diffDirectoriesAddModify (dir1 : File, dir2 : File): Seq[DifferenceDir] = {
     val pathDir1 = dir1.path
     val pathDir2 = dir2.path
 
+    /*
+    iterate over d1
+     */
     def aux (d1: Seq[File]): Seq[DifferenceDir] = {
       if (d1.isEmpty) {
         return Seq()
       }
 
+      // Stored as relative path
       val pathRelatif = pathDir1.relativize(d1.head.path)
       val pathToFileInDir2 = pathDir2 + "/" + pathRelatif.toString
 
@@ -84,7 +91,7 @@ object Difference {
     return aux(dir1.children.toSeq)
   }
 
-
+  // Add the delete file from diffs1 to diffs2 (Added file in diffs2 are deleted files in diffs1)
   def concatDirDiff(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
     def aux (v2: Seq[DifferenceDir]) : Seq [DifferenceDir] = {
       if (!v2.isEmpty) {
@@ -99,4 +106,21 @@ object Difference {
     }
     return diffs1 ++ aux(diffs2)
   }
+
+  // Compute the difference between to Seq of difference (diffs1 = WD and diffs2 = SA
+  def diffOfDiffDir(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
+    def aux(d1: Seq[DifferenceDir]) : Seq [DifferenceDir] = {
+        if (d1.isEmpty){
+          return Seq()
+        }
+        if (!diffs2.contains(d1.head)) {
+           aux(d1.tail) :+ d1.head
+        } else {
+           aux(d1.tail)
+        }
+    }
+     aux(diffs1)
+  }
 }
+
+

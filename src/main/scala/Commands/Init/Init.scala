@@ -3,9 +3,12 @@ package Commands.Init
 import better.files.File
 
 object Init {
-  def init(dir : String): Unit = {
+  /*
+  Return true if .sgit was created correctly
+   */
+  def init(dir : String): Boolean = {
     if (!File(dir + "/.sgit").isEmpty) {
-      println("Dépôt SGit existant dans " + dir);
+      false
     } else {
       /*
     Archi :
@@ -28,6 +31,7 @@ object Init {
       File(dir + "/.sgit/branch").createIfNotExists(true)
       File(dir + "/config.json")
       File(dir + "/ref.json")
+      true
     }
   }
 }

@@ -50,9 +50,10 @@ class DifferenceDirTest extends FunSuite {
     assert(diffs === Seq(DifferenceDir("txt1", DiffEnum.DELETE), DifferenceDir("txt2", DiffEnum.ADD)))
   }
 
-  test("With same directori") {
+  test("With same directory") {
     val dir = System.getProperty("user.dir") + "/../";
-    val f = File(dir + "/testDirSGit/SA.json").createIfNotExists(true, true)
+    val f = File(dir + "/testDirSGit").createIfNotExists(true)
+    File (dir + "/testDirSGit/SA.json").createIfNotExists().overwrite("hello");
     val diffs = Difference.diffDirectories(f, f)
     f.delete()
     assert(diffs === Seq())
@@ -171,7 +172,33 @@ class DifferenceDirTest extends FunSuite {
       DifferenceDir("t1.txt", DiffEnum.DELETE),
       DifferenceDir("t2.txt", DiffEnum.ADD)
     ))
+  }
 
+  test("diffOfDiffDir - No diff, empty") {
+    val diff1 = Seq();
+    val diff2 = Seq();
 
+    val diffBetweenDiff  = Difference.diffOfDiffDir(diff1, diff2);
+    assert (Seq() === diffBetweenDiff)
+
+  }
+
+  test("diffOfDiffDir - No diff, no empty") {
+    val diff1 = Seq(DifferenceDir("dir1bis/t1.txt", DiffEnum.DELETE));
+    val diff2 = Seq(DifferenceDir("dir1bis/t1.txt", DiffEnum.DELETE));
+
+    val diffBetweenDiff  = Difference.diffOfDiffDir(diff1, diff2);
+    assert (Seq() === diffBetweenDiff)
+
+  }
+
+  test("diffOfDiffDir - One diff") {
+    val diff1 = Seq(
+      DifferenceDir("dir1bis/t1.txt", DiffEnum.DELETE),
+      DifferenceDir("dir1bis/t2.txt", DiffEnum.ADD));
+    val diff2 = Seq(DifferenceDir("dir1bis/t1.txt", DiffEnum.DELETE));
+
+    val diffBetweenDiff  = Difference.diffOfDiffDir(diff1, diff2);
+    assert (Seq(DifferenceDir("dir1bis/t2.txt", DiffEnum.ADD)) === diffBetweenDiff)
   }
 }

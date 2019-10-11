@@ -5,6 +5,8 @@ import java.nio.file.{Path, Paths}
 import better.files.File
 import org.json4s.native.Json
 
+import scala.io.Source
+
 case class DifferenceFile(diff: DiffEnum.Value, index: Int, content: String) {}
 case class DifferenceDir(path: String, diff: DiffEnum.Value){}
 
@@ -13,7 +15,15 @@ object Difference {
   Compute the delta between two files. Delta is modifications to apply to text 1 to get text 2.
   One difference between files is stored as Difference (class)
    */
-  def diffFiles (text1: Seq[String], text2: Seq[String]) : Seq[DifferenceFile] = {
+  def diffFiles (f1: File, f2: File) : Seq[DifferenceFile] = {
+    val text1 = Source.fromFile(f1.pathAsString).getLines.toSeq
+    val text2 = Source.fromFile(f2.pathAsString).getLines.toSeq
+
+    diffSeqString(text1, text2)
+
+  }
+
+  def diffSeqString(text1: Seq[String], text2: Seq[String]) : Seq[DifferenceFile] = {
     def aux(t1: Seq[String], t2: Seq[String], diffs: Seq[DifferenceFile], index: Int) : Seq[DifferenceFile] = {
       // Is both empty, all differences have been computed
       if (t1.isEmpty && t2.isEmpty) {
@@ -30,12 +40,12 @@ object Difference {
 
 
       if (t1.head.equals(t2.head)) {
-        return aux(t1.tail, t2.tail, diffs, index + 1)
+        aux(t1.tail, t2.tail, diffs, index + 1)
       } else {
-        // Id not equals, we can get delete text 1 line or add text 2 line. We cannot know what the vest choice is
+        // If not equals, we can get delete text 1 line or add text 2 line. We cannot know what the vest choice is
         // So try both and keep the better one (solution with less diff)
-        var pos1 = aux(t1, t2.tail, diffs :+ DifferenceFile(DiffEnum.ADD, index, t2.head), index + 1)
-        var pos2 = aux(t1.tail, t2, diffs :+ DifferenceFile(DiffEnum.DELETE, index, t1.head), index + 1)
+        val pos1 = aux(t1, t2.tail, diffs :+ DifferenceFile(DiffEnum.ADD, index, t2.head), index + 1)
+        val pos2 = aux(t1.tail, t2, diffs :+ DifferenceFile(DiffEnum.DELETE, index, t1.head), index + 1)
         if (pos1.length < pos2.length) pos1 else pos2
       }
     }

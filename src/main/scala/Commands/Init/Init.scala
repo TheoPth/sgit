@@ -1,5 +1,7 @@
 package Commands.Init
 
+import Commands.Commit.Commit
+import Utils.JSON.UJson
 import better.files.File
 
 object Init {
@@ -33,11 +35,14 @@ object Init {
      */
       File(dir + "/.sgit").createIfNotExists(true)
       File(dir + "/.sgit/SA").createIfNotExists(true)
-      File(dir + "/.sgit/branchs/master/HEAD").createIfNotExists(true, true);
-      File(dir + "/.sgit/branchs/master/commits.json").createIfNotExists()
-      File(dir + "/.sgit/branch").createIfNotExists(true)
+      File(dir + "/.sgit/commits")createIfNotExists (true)
+      File(dir + "/.sgit/head").createIfNotExists(true)
       File(dir + "/config.json")
-      File(dir + "/ref.json")
+      val fileRef = File(dir + "/.sgit/ref.json").createIfNotExists()
+
+      // Initialize on master branch
+      fileRef.write(""" {"ref": "master", "branchs":{"master": ""}} """)
+
       true
     }
   }

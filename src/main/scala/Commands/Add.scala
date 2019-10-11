@@ -3,31 +3,21 @@ package Commands
 import java.nio.file.{Path, Paths}
 
 import Utils.Difference.{Difference, DifferenceDir}
-import Utils.JSON.Json
-import Utils.MoveDir.MoveDir
+import Utils.MoveDir.{MoveDir, Sdir}
 import better.files.File
 import org.json4s._
 import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read, write}
-
-import scala.io.Source
-
 
 object Add {
   /*
     Add fonc save diff between WD and last commit
    */
-  val relativePathToBranchAct = "/branch/HEAD/"
-  val relativePathToStageArea = "/SA"
-
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
   def add(args: Seq[String], dirAct: File) : Unit = {
-    val pathToSgit: Path = MoveDir.findPathSgit(dirAct.path)
-
-    val WD = File(pathToSgit + "/..")
-    val SA = File(pathToSgit + "/../.sgit" + relativePathToStageArea);
+    val WD = Sdir.getWD(dirAct)
+    val SA = Sdir.getSA(dirAct)
 
 
     // retrieve all files ( from the path where the commands was triggered )
@@ -37,8 +27,6 @@ object Add {
     val relativesPath2 = getRelativePathFromRegexOrNames(args, SA)
 
     var relativesPath = unionPath(relativesPath1, relativesPath2)
-
-
 
     // if path is not at the root
     if(WD.path != dirAct.path) {

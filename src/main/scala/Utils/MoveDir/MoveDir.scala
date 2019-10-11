@@ -38,6 +38,24 @@ object MoveDir {
     }
   }
 
+
+  // Change relative path to new File ref
+  // newBaseDir is the path to go to new dir in relative
+  def changeBaseDirForSeqRelativePath(paths: Seq[Path], pathToNewDir: Path): Seq[Path] = {
+
+    def aux(oldPaths: Seq[Path], newPaths: Seq[Path]) : Seq[Path] = {
+      if(oldPaths.isEmpty) {
+        newPaths
+      } else {
+        val newPath = Paths.get(pathToNewDir.toString + "/" + oldPaths.head.toString)
+        aux(oldPaths.tail, newPaths :+ newPath)
+      }
+    }
+
+    aux(paths, Seq())
+  }
+
+
   def toRelativePath(path1: Path, path2: Path): Path = {
     path1.relativize(path2);
   }
@@ -79,7 +97,7 @@ object MoveDir {
       if (files.head.name.equals(name)) {
         true
       } else {
-        false || aux(files.tail)
+        aux(files.tail)
       }
     }
 
@@ -88,7 +106,36 @@ object MoveDir {
     } else {
       false
     }
-
   }
 
+  // Copy files from dir1 to dir2 with relatives path, delete the file in the dir2 if not in the dir1
+  def copyFilesRelativePathToDir(relativePaths: Seq[Path], dir1: File, dir2: File): Unit = {
+    relativePaths.map(path => {
+
+      val f1 = File(dir1.pathAsString + "/" + path)
+      val f2 = File(dir2.pathAsString + "/" + path)
+
+      // if the file has been added
+      if (f1.exists && !f2.exists) {
+
+        var target: File = null;
+        if (path.getParent != null) {
+          target = File(dir2.pathAsString + "/" + path.getParent).createIfNotExists(true, true)
+        } else {
+          target = dir2
+        }
+
+        f1.copyToDirectory(target)
+
+        // if the file has been modified
+      } else if (f1.exists && f2.exists && !f1.isSameContentAs(f2)) {
+        f2.delete()
+        f1.copyToDirectory(dir2)
+
+        // if the file has been deleted
+      } else {
+        f2.delete();
+      }
+    })
+  }
 }

@@ -1,8 +1,9 @@
 package Utils.Difference
 
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 import better.files.File
+import org.json4s.native.Json
 
 case class DifferenceFile(diff: DiffEnum.Value, index: Int, content: String) {}
 case class DifferenceDir(path: String, diff: DiffEnum.Value){}
@@ -44,18 +45,18 @@ object Difference {
 
 
   /*
-    Compute wich files are added or modify between dir1 and dir2 recursively
+    Compute which files are added or modify between dir1 and dir2 recursively
      */
   def diffDirectories(dir1 : File, dir2 : File): Seq[DifferenceDir] = {
-    val res1 = diffDirectoriesAddModify(dir1, dir2)
-    val res2 = diffDirectoriesAddModify(dir2, dir1)
-    computeDirDiff(res1, res2)
+      val res1 = diffDirectoriesAddModify(dir1, dir2)
+      val res2 = diffDirectoriesAddModify(dir2, dir1)
+      computeDirDiff(res1, res2)
   }
 
   /*
     Compute diffs between two directories (only file deleted and modified)
   */
-  def diffDirectoriesAddModify (dir1 : File, dir2 : File): Seq[DifferenceDir] = {
+  def diffDirectoriesAddModify (dir1 : File, dir2: File): Seq[DifferenceDir] = {
     val pathDir1 = dir1.path
     val pathDir2 = dir2.path
 
@@ -73,29 +74,47 @@ object Difference {
 
       // File to compare
       val file1 = d1.head
+
       val file2  = File(pathToFileInDir2)
 
       if (file1.isDirectory) {
         return aux(d1.head.children.toSeq) ++ aux(d1.tail)
       }
 
-      if (!file2.exists)
-        return aux(d1.tail) :+ DifferenceDir(pathRelatif.toString, DiffEnum.DELETE)
+      val diff = computeDiffBetweenTwoFiles(dir1, dir2, pathRelatif)
 
-      if (file1.isSameContentAs(file2)) {
-        return aux (d1.tail)
-      } else {
-        return aux (d1.tail) :+ DifferenceDir(pathRelatif.toString, DiffEnum.MODIFY)
+      diff match {
+        case Some(diff) =>   aux(d1.tail) :+ DifferenceDir( pathRelatif.toString, diff)
+        case None => aux(d1.tail)
       }
+
     }
 
-    if (dir1.isDirectory) {
-      aux(dir1.children.toSeq)
-    } else {
-      aux (Seq(dir1))
-    }
-
+    aux(dir1.children.toSeq)
   }
+
+  // Return a diff dir if files have'nt the same status
+  // path is the path to store in the differenceDir (path of File is always absolute)
+  // Null if no diff between files
+  def computeDiffBetweenTwoFiles(dir1: File, dir2: File, pathRelative: Path): Option[DiffEnum.Value]= {
+    val file1 = File(dir1.pathAsString + "/" + pathRelative)
+    val file2 = File(dir2.pathAsString + "/" + pathRelative)
+
+    if (!file2.exists) {
+      return Some(DiffEnum.DELETE)
+    }
+
+    if(!file1.exists) {
+      return Some(DiffEnum.ADD)
+    }
+
+    if (file1.isSameContentAs(file2)) {
+      None
+    } else {
+      Some(DiffEnum.MODIFY)
+    }
+  }
+
 
   // Add the delete file from diffs1 to diffs2 (Added file in diffs2 are deleted files in diffs1)
   def computeDirDiff(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
@@ -113,7 +132,7 @@ object Difference {
     return diffs1 ++ aux(diffs2)
   }
 
-  // Concat two Seqs of dirDiff and delete redondants7 dirDiffs
+  // Concat two Seqs of dirDiff and delete redondants dirDiffs
   def unionDirDiff(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
 
     def aux(dd1: Seq[DifferenceDir], acc : Seq[DifferenceDir]): Seq[DifferenceDir] = {
@@ -127,20 +146,25 @@ object Difference {
     aux(diffs1, Seq())
   }
 
-  // Compute the difference between to Seq of difference (diffs1 = WD and diffs2 = SA
+  // Compute the difference between to Seq of difference (diffs1 = WD and diffs2 = SA)
   def diffOfDiffDir(diffs1: Seq[DifferenceDir], diffs2: Seq[DifferenceDir]) : Seq[DifferenceDir] = {
     def aux(d1: Seq[DifferenceDir]) : Seq [DifferenceDir] = {
-        if (d1.isEmpty){
-          return Seq()
-        }
-        if (!diffs2.contains(d1.head)) {
-           aux(d1.tail) :+ d1.head
-        } else {
-           aux(d1.tail)
-        }
+      if (d1.isEmpty){
+        return Seq()
+      }
+      if (!diffs2.contains(d1.head)) {
+        aux(d1.tail) :+ d1.head
+      } else {
+        aux(d1.tail)
+      }
     }
-     aux(diffs1)
+    aux(diffs1)
   }
+
+  // Jsonify a Seq of DifferenceDir
+  //def stringifySeqOfDifferenceDir(diffs : Seq[DifferenceDir]): Json = {
+
+  //}
 }
 
 

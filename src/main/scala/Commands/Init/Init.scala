@@ -3,11 +3,18 @@ package Commands.Init
 import better.files.File
 
 object Init {
+
+  /* Init a sgit repo and print log */
+  def initRepo(dir: File): Unit = {
+    if (Init.init(dir)) println("Initialized empty Git repository in " + dir.path)
+    else println("Reinitialized existing Git repository in " + dir.path )
+  }
+
   /*
   Return true if .sgit was created correctly
    */
-  def init(dir : String): Boolean = {
-    if (!File(dir + "/.sgit").isEmpty) {
+  def init(dir : File): Boolean = {
+    if (dir.children.contains(File(dir.path + "/.sgit"))) {
       false
     } else {
       /*
@@ -25,7 +32,7 @@ object Init {
        |-ref // file follow the head
      */
       File(dir + "/.sgit").createIfNotExists(true)
-      File(dir + "/.sgit/SA.json").createIfNotExists().overwrite ("{}")
+      File(dir + "/.sgit/SA").createIfNotExists(true)
       File(dir + "/.sgit/branchs/master/HEAD").createIfNotExists(true, true);
       File(dir + "/.sgit/branchs/master/commits.json").createIfNotExists()
       File(dir + "/.sgit/branch").createIfNotExists(true)

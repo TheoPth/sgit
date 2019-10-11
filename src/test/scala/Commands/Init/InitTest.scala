@@ -6,28 +6,24 @@ import org.scalatest.FunSuite
 class InitTest extends FunSuite{
   test("Create architecture") {
     // Create a dir to test
-    val dir = System.getProperty("user.dir") + "/../";
+    val dirTestPath = System.getProperty("user.dir") + "/../testInit";
+    val dirTest = File(dirTestPath).createIfNotExists(true)
 
-    Init.init(dir)
-
-    assert(File(dir + "/.sgit").isEmpty == false)
+    assert(Init.init(dirTest) == true)
+    assert(dirTest.isEmpty == false)
 
     // Delete test
-    File(dir + "/.sgit").delete()
-    assert(File(dir + "/.sgit").isEmpty == true)
+    dirTest.delete()
   }
 
   test("Don't scratch existing .sgit") {
-    val dir = System.getProperty("user.dir") + "/../";
-    Init.init(dir)
-    File(dir + "/.sgit/SA.json").renameTo("change")
-    assert (File(dir + "/.sgit/change").isEmpty == false)
-    assert (File(dir + "/.sgit/SA.json").isEmpty == true)
-    Init.init(dir)
-    assert (File(dir + "/.sgit/SA.json").isEmpty == true)
+    val dirTestPath = System.getProperty("user.dir") + "/../testInit";
+    val dirTest = File(dirTestPath).createIfNotExists(true)
+
+    Init.init(dirTest)
+    assert(Init.init(dirTest) == false)
 
     // Delete test
-    File(dir + "/.sgit").delete()
-    assert(File(dir + "/.sgit").isEmpty == true)
+    dirTest.delete()
   }
 }

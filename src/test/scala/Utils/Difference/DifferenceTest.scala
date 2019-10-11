@@ -1,4 +1,6 @@
 package Utils.Difference
+import java.nio.file.Paths
+
 import better.files.File
 import org.scalatest.FunSuite
 
@@ -62,26 +64,36 @@ class DifferenceDirTest extends FunSuite {
   test("diffDirectories - Between two files") {
     val dirTestPath = System.getProperty("user.dir") + "/../testDir";
     val dirTest = File(dirTestPath).createIfNotExists(true)
-    File(dirTestPath + "/dir1").createIfNotExists(true)
-    File(dirTestPath + "/dir2").createIfNotExists(true)
-    val f1 = File(dirTest + "/dir1/hello.txt").createIfNotExists().overwrite("hello1")
-    val f2 = File(dirTest + "/dir2/hello.txt").createIfNotExists().overwrite("hello2")
 
-    val diffs = Difference.diffDirectories(f1, f2)
+    val dir1 = File(dirTestPath + "/dir1").createIfNotExists(true)
+    val dir2 = File(dirTestPath + "/dir2").createIfNotExists(true)
+    val f1 = File(dirTestPath + "/dir1/hello.txt").createIfNotExists().overwrite("hello1")
+    val f2 = File(dirTestPath + "/dir2/hello.txt").createIfNotExists().overwrite("hello2")
+
+    val diff = Difference.computeDiffBetweenTwoFiles(dir1, dir2, Paths.get("hello.txt"))
+
+    var diffs : Seq[DifferenceDir] = Seq()
+    diff match {
+      case Some(diff) => diffs = Seq(DifferenceDir("hello.txt", diff))
+      case None =>
+    }
+
     dirTest.delete()
+
+
     assert(diffs === Seq(DifferenceDir("hello.txt", DiffEnum.MODIFY)))
   }
 
   test("diffDirectories - With one diff file") {
-    val dir = System.getProperty("user.dir") + "/../";
-    val f1 = File(dir + "/dir1").createIfNotExists(true)
-    val f2 = File(dir + "/dir2").createIfNotExists(true)
-    File(dir + "/dir1/t1.txt").createIfNotExists().overwrite("Hello")
-    File(dir + "/dir2/t2.txt").createIfNotExists().overwrite("Hello2")
+    val dirTestPath = System.getProperty("user.dir") + "/../asupp";
+    val dirTest = File(dirTestPath).createIfNotExists(true)
+    val f1 = File(dirTestPath + "/dir1").createIfNotExists(true)
+    val f2 = File(dirTestPath + "/dir2").createIfNotExists(true)
+    File(dirTestPath + "/dir1/t1.txt").createIfNotExists().overwrite("Hello")
+    File(dirTestPath + "/dir2/t2.txt").createIfNotExists().overwrite("Hello2")
     val diffs = Difference.diffDirectories(f2, f1)
 
-    f1.delete()
-    f2.delete()
+    dirTest.delete()
 
     assert(diffs === Seq(
       DifferenceDir("t2.txt", DiffEnum.DELETE),
@@ -90,7 +102,7 @@ class DifferenceDirTest extends FunSuite {
 
   }
 
-  test("With two diff file") {
+  test("diffDirectories - With two diff file") {
     val dir = System.getProperty("user.dir") + "/../";
 
     // Create directories
@@ -115,7 +127,7 @@ class DifferenceDirTest extends FunSuite {
 
   }
 
-  test("With one modify file") {
+  test("diffDirectories - With one modify file") {
     val dir = System.getProperty("user.dir") + "/../";
     val f1 = File(dir + "/dir1").createIfNotExists(true)
     val f2 = File(dir + "/dir2").createIfNotExists(true)
@@ -133,8 +145,8 @@ class DifferenceDirTest extends FunSuite {
 
   }
 
-  test("With one file in one directory") {
-    val dir = System.getProperty("user.dir") + "/../";
+  test("diffDirectories - With one file in one directory") {
+    val dir = System.getProperty("user.dir") + "/../dirTestOnFile";
 
     // Create directories
     val f1 = File(dir + "/dir1").createIfNotExists(true)
@@ -146,11 +158,9 @@ class DifferenceDirTest extends FunSuite {
     File(dir + "/dir1/t1.txt").createIfNotExists().overwrite("Hello")
     File(dir + "/dir2/t2.txt").createIfNotExists().overwrite("Hello")
 
-
     val diffs = Difference.diffDirectories(f1, f2)
 
-    f1.delete()
-    f2.delete()
+    File(dir).delete()
 
     assert(diffs === Seq(
       DifferenceDir("dir1bis/t1.txt", DiffEnum.DELETE),
@@ -161,7 +171,7 @@ class DifferenceDirTest extends FunSuite {
 
   }
 
-  test("Add a directory and a file") {
+  test("diffDirectories - Add a directory and a file") {
     val dir = System.getProperty("user.dir") + "/../";
 
     // Create directories

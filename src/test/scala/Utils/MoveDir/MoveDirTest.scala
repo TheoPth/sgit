@@ -45,7 +45,7 @@ class MoveDirTest extends FunSuite{
   test("findPathSgit - .sgit in the same directory") {
     val dirTestPath = System.getProperty("user.dir") + "/../test/";
     var dir = File(dirTestPath).createIfNotExists(true)
-    Init.init(dir.pathAsString);
+    Init.init(dir);
     val path = MoveDir.findPathSgit(dir.path)
     dir.delete()
 
@@ -56,7 +56,7 @@ class MoveDirTest extends FunSuite{
   test("findPathSgit - .sgit in the parent directory") {
     val dirTestPath = System.getProperty("user.dir") + "/../test/";
     val dir = File(dirTestPath).createIfNotExists(true)
-    Init.init(dir.pathAsString);
+    Init.init(dir);
 
     // Create the directory start
     val dirStart = File(dirTestPath + "/dir1/dir2").createIfNotExists(true, true)
@@ -82,7 +82,7 @@ class MoveDirTest extends FunSuite{
   test("findRelativePathSgit - .sgit in the same directory") {
     val dirTestPath = System.getProperty("user.dir") + "/../test/";
     val dir = File(dirTestPath).createIfNotExists(true)
-    Init.init(dir.pathAsString);
+    Init.init(dir);
 
     val path = MoveDir.findRelativePathSgit(dir.path)
     dir.delete()
@@ -93,7 +93,7 @@ class MoveDirTest extends FunSuite{
   test("findRelativePathSgit - .sgit in the parent directory") {
     val dirTestPath = System.getProperty("user.dir") + "/../test/";
     val dir = File(dirTestPath).createIfNotExists(true)
-    Init.init(dir.pathAsString);
+    Init.init(dir);
 
     // Create the directory start
     val dirStart = File(dirTestPath + "/dir1/dir2").createIfNotExists(true, true)
@@ -113,5 +113,20 @@ class MoveDirTest extends FunSuite{
 
     dir.delete()
     assert(path == null)
+  }
+
+  test("copyFilesFromPathToDir - one file in one directory") {
+    val dirTestPath = System.getProperty("user.dir") + "/../test/";
+    val dir = File(dirTestPath).createIfNotExists(true)
+
+    val dir1 = File(dirTestPath + "/dir1").createIfNotExists(true)
+    val dir2 = File(dirTestPath + "/dir2").createIfNotExists(true)
+    File(dirTestPath + "/dir1/dirbis").createIfNotExists(true)
+    File(dirTestPath + "/dir1/dirbis/hello.txt").createIfNotExists().overwrite("hello")
+
+    MoveDir.copyFilesRelativePathToDir(Seq(Paths.get("dirbis/hello.txt")), dir1, dir2)
+    assert(File(dirTestPath +"/dir2/dirbis/hello.txt").exists == true);
+    dir.delete()
+
   }
 }

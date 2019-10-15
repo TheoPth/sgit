@@ -2,6 +2,7 @@ package Utils.Difference
 
 import java.nio.file.{Path, Paths}
 
+import Utils.Difference.Difference.diffDirectoriesAddModify
 import better.files.File
 import org.json4s.native.Json
 
@@ -21,6 +22,36 @@ object Difference {
 
     diffSeqString(text1, text2)
 
+  }
+
+  def optDiffFile(file1: Option[File], file2 : Option[File]): Seq[DifferenceFile] = {
+    (file1, file2) match {
+      case (Some(f1), Some(f2)) => {
+        diffFiles(f1, f2)
+      }
+      case (Some(f1), None) => {
+        var diffs: Seq[DifferenceFile] = Seq()
+        File.usingTemporaryFile() {
+          tmpFile => {
+            diffs = diffFiles(f1, tmpFile)
+          }
+        }
+        diffs
+
+      }
+
+      case (None, Some(f2)) => {
+        var diffs: Seq[DifferenceFile] = Seq()
+        File.usingTemporaryFile() {
+          tmpFile => {
+            diffs = diffFiles(tmpFile, f2)
+          }
+        }
+        diffs
+      }
+
+      case (None, None) => Seq()
+    }
   }
 
   def diffSeqString(text1: Seq[String], text2: Seq[String]) : Seq[DifferenceFile] = {
@@ -50,17 +81,49 @@ object Difference {
       }
     }
 
-    return aux(text1, text2, Seq(), 0);
+    aux(text1, text2, Seq(), 0);
   }
 
 
   /*
     Compute which files are added or modify between dir1 and dir2 recursively
+    ignore .sgit directori
      */
   def diffDirectories(dir1 : File, dir2 : File): Seq[DifferenceDir] = {
-      val res1 = diffDirectoriesAddModify(dir1, dir2)
-      val res2 = diffDirectoriesAddModify(dir2, dir1)
-      computeDirDiff(res1, res2)
+    val res1 = diffDirectoriesAddModify(dir1, dir2)
+    val res2 = diffDirectoriesAddModify(dir2, dir1)
+    computeDirDiff(res1, res2)
+  }
+
+  /*
+    Compute which files are added or modify between dir1 and dir2 recursively
+     */
+  def optDiffDirectories(dir1 : Option[File], dir2 : Option[File]): Seq[DifferenceDir] = {
+    (dir1, dir2) match {
+      case (Some(f1), Some(f2)) => {
+        diffDirectories(f1, f2)
+      }
+      case (Some(f1), None) => {
+        var diffs: Seq[DifferenceDir] = Seq()
+        File.usingTemporaryDirectory() {
+          tmpDir => {
+            diffs = diffDirectoriesAddModify(f1, tmpDir)
+          }
+        }
+        diffs
+      }
+      case (None, Some(f2)) => {
+        var diffs: Seq[DifferenceDir] = Seq()
+        File.usingTemporaryDirectory() {
+          tmpDir => {
+            val addMod = diffDirectoriesAddModify(tmpDir, f2)
+            diffs = computeDirDiff(Seq(), addMod)
+          }
+        }
+        diffs
+      }
+      case (None, None) => Seq()
+    }
   }
 
   /*
@@ -78,14 +141,16 @@ object Difference {
         return Seq()
       }
 
+      if (d1.head.name.equals(".sgit")) {
+        return aux(d1.tail)
+      }
+
       // Stored as relative path
       val pathRelatif = pathDir1.relativize(d1.head.path)
       val pathToFileInDir2 = pathDir2 + "/" + pathRelatif.toString
 
       // File to compare
       val file1 = d1.head
-
-      val file2  = File(pathToFileInDir2)
 
       if (file1.isDirectory) {
         return aux(d1.head.children.toSeq) ++ aux(d1.tail)
@@ -94,10 +159,9 @@ object Difference {
       val diff = computeDiffBetweenTwoFiles(dir1, dir2, pathRelatif)
 
       diff match {
-        case Some(diff) =>   aux(d1.tail) :+ DifferenceDir( pathRelatif.toString, diff)
+        case Some(diff) =>  aux(d1.tail) :+ DifferenceDir( pathRelatif.toString, diff)
         case None => aux(d1.tail)
       }
-
     }
 
     aux(dir1.children.toSeq)
@@ -171,10 +235,30 @@ object Difference {
     aux(diffs1)
   }
 
-  // Jsonify a Seq of DifferenceDir
-  //def stringifySeqOfDifferenceDir(diffs : Seq[DifferenceDir]): Json = {
+  // Compute diffs but not recursively ( compute only add file or dir in the current dir)
+  def getDiffOnTop(dir1: File, dir2: File) : Seq[DifferenceDir] = {
+    val pathDir1 = dir1.path
+    val pathDir2 = dir2.path
 
-  //}
+    var added: Seq[DifferenceDir] = Seq()
+
+    dir1.children.toSeq.foreach( child => {
+
+      // Stored as relative path
+      var pathRelatif = pathDir1.relativize(child.path)
+      val pathToFileInDir2 = pathDir2 + "/" + pathRelatif.toString
+
+      if (!File(pathToFileInDir2).exists && child.name != ".sgit") {
+        if (child.isDirectory) {
+          added = added :+ DifferenceDir(pathRelatif.toString +"/", DiffEnum.ADD)
+        } else {
+          added = added :+ DifferenceDir(pathRelatif.toString, DiffEnum.ADD)
+        }
+      }
+    })
+
+    added
+  }
 }
 
 

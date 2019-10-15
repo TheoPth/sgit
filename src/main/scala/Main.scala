@@ -1,4 +1,4 @@
-import Commands.Add
+import Commands.{Add, Status}
 import Commands.Commit.Commit
 import Commands.Init.Init
 import better.files.File
@@ -21,7 +21,8 @@ object Main extends App {
       case "init" => Init.initRepo(dirAct)
       case "add" => Add.add(args.tail, dirAct)
       case "commit" => Commit.commit(args.tail, dirAct)
-      case _ => println("git: '" + command + "' is not a git command.")
+      case "status" => Status.status(dirAct)
+      case _ => println("sgit: '" + command + "' is not a sgit command.")
     }
   }
 }

@@ -34,11 +34,15 @@ object Sdir {
     File(pathToSgit + relativePathToDirCommits)
   }
 
-  def getHeadCommit(dirAct: File): Option[File] = {
+  def getOptHeadCommitDir(dirAct: File): Option[File] = {
     // Retrieve the name of the last commit
     val nameCurrentCommit = URef.getHashCurrentCommit(getRef(dirAct));
-
     if (nameCurrentCommit.equals("")) None else Some(File(getCommitDir(dirAct) + "/" +  nameCurrentCommit))
+  }
+
+  def getOptHeadCommit(dirAct: File): Option[File] = {
+    val nameCurrentCommit = URef.getHashCurrentCommit(getRef(dirAct));
+    if (nameCurrentCommit.equals("")) None else Some(File(getCommitDir(dirAct) + "/" +  nameCurrentCommit + "/src"))
   }
 
   def getRef(dirAct: File): File = {

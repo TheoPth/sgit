@@ -8,8 +8,8 @@ object Init {
 
   /* Init a sgit repo and print log */
   def initRepo(dir: File): Unit = {
-    if (Init.init(dir)) println("Initialized empty Git repository in " + dir.path)
-    else println("Reinitialized existing Git repository in " + dir.path )
+    if (Init.init(dir)) println("Initialized empty Sgit repository in " + dir.path)
+    else println("Reinitialized existing Sgit repository in " + dir.path )
   }
 
   /*

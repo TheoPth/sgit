@@ -16,9 +16,18 @@ object Add {
   implicit val formats = Serialization.formats(NoTypeHints)
 
   def add(args: Seq[String], dirAct: File) : Unit = {
+    if (args.length <= 0) {
+      println(raw"""Nothing specified, nothing added.
+                   |Maybe you wanted to say 'sgit add .'?""".stripMargin)
+
+    } else {
+      makeAdd(args, dirAct)
+    }
+  }
+
+  def makeAdd(args: Seq[String], dirAct: File) : Unit = {
     val WD = Sdir.getWD(dirAct)
     val SA = Sdir.getSA(dirAct)
-
 
     // retrieve all files ( from the path where the commands was triggered )
     val relativesPath1 = getRelativePathFromRegexOrNames(args, dirAct)
@@ -77,8 +86,6 @@ object Add {
 
         aux(paths.tail, Difference.unionDirDiff(diffs, acc))
       }
-
-
     }
 
     aux(pathToTest, Seq())
@@ -92,10 +99,18 @@ object Add {
       if (args.isEmpty) {
         acc
       } else {
-        val files = baseDir.glob(args.head, includePath = true).toSeq
+        var files: Seq[File] = Seq()
+
+        if (args.head.equals(".")) {
+          files = baseDir.children.toSeq
+        } else {
+          files = baseDir.glob(args.head, includePath = true).toSeq
+        }
+
+        files = files.filter(file => file.name != ".sgit")
+
         val relativesPaths = MoveDir.seqFilesToSeqRelativePath(files, baseDir)
         aux(args.tail, acc ++ relativesPaths)
-
       }
     }
 

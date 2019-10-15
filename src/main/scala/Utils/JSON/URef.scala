@@ -27,7 +27,6 @@ object URef {
     val hashCommit = jRef transformField{
       case JField(b, JString(s)) if b == nameBranch => return s
     }
-
     hashCommit.extract[String]
   }
 

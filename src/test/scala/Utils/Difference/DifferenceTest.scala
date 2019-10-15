@@ -1,6 +1,7 @@
 package Utils.Difference
 import java.nio.file.Paths
 
+import Commands.Init.Init
 import better.files.File
 import org.scalatest.FunSuite
 
@@ -240,6 +241,21 @@ class DifferenceDirTest extends FunSuite {
       Seq(DifferenceDir("/hello", DiffEnum.ADD))
       );
     assert(union === Seq(DifferenceDir("/hello2", DiffEnum.ADD), DifferenceDir("/hello", DiffEnum.ADD)))
+  }
+
+  test("getDiffOnTop - one diff") {
+    val dirTestPath = System.getProperty("user.dir") + "/../diffenceTest";
+    val dirTest = File (dirTestPath).createIfNotExists(true)
+
+    val d1 = File(dirTestPath + "/d1").createIfNotExists(true)
+    val d2 = File(dirTestPath + "/d2").createIfNotExists(true)
+
+    File(dirTestPath + "/d1/d3/d4").createIfNotExists(true, true)
+
+    val res = Difference.getDiffOnTop(d1, d2)
+
+    dirTest.delete()
+    assert(Seq(DifferenceDir("d3/", DiffEnum.ADD)) === res)
   }
 
 }

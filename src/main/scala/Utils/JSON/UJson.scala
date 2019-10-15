@@ -20,7 +20,6 @@ object UJson {
   def readDeserializeSeqDifferenceDir(file: File): Seq[DifferenceDir] = {
     val ser = Source.fromFile(file.pathAsString).getLines.mkString
     deserializeSeqDifferenceDir(ser)
-
   }
 
   def serializeSeqDifferenceDir(seqDiffs: Seq[DifferenceDir]): String = {

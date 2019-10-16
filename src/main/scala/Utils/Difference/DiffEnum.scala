@@ -6,4 +6,5 @@ object DiffEnum extends Enumeration with Serializable {
   val ADD = Value
   val DELETE = Value
   val MODIFY = Value
+  val EQUALS = Value
 }

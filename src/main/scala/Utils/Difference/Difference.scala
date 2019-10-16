@@ -21,7 +21,6 @@ object Difference {
     val text2 = Source.fromFile(f2.pathAsString).getLines.toSeq
 
     diffSeqString(text1, text2)
-
   }
 
   def optDiffFile(file1: Option[File], file2 : Option[File]): Seq[DifferenceFile] = {
@@ -55,33 +54,34 @@ object Difference {
   }
 
   def diffSeqString(text1: Seq[String], text2: Seq[String]) : Seq[DifferenceFile] = {
-    def aux(t1: Seq[String], t2: Seq[String], diffs: Seq[DifferenceFile], index: Int) : Seq[DifferenceFile] = {
+    def aux(t1: Seq[String], t2: Seq[String], diffs: Seq[DifferenceFile]) : Seq[DifferenceFile] = {
       // Is both empty, all differences have been computed
       if (t1.isEmpty && t2.isEmpty) {
         return diffs
       }
 
       if (t1.isEmpty) {
-        return aux(t1, t2.tail, diffs :+ DifferenceFile(DiffEnum.ADD, index, t2.head), index + 1)
+        return aux(t1, t2.tail, diffs :+ DifferenceFile(DiffEnum.ADD, diffs.length, t2.head))
       }
 
       if (t2.isEmpty) {
-        return aux(t1.tail, t2, diffs :+ DifferenceFile(DiffEnum.DELETE, index, t1.head), index + 1)
+        return aux(t1.tail, t2, diffs :+ DifferenceFile(DiffEnum.DELETE, diffs.length, t1.head))
       }
 
 
       if (t1.head.equals(t2.head)) {
-        aux(t1.tail, t2.tail, diffs, index + 1)
+        aux(t1.tail, t2.tail, diffs :+ DifferenceFile(DiffEnum.EQUALS, diffs.length, t2.head))
       } else {
         // If not equals, we can get delete text 1 line or add text 2 line. We cannot know what the vest choice is
         // So try both and keep the better one (solution with less diff)
-        val pos1 = aux(t1, t2.tail, diffs :+ DifferenceFile(DiffEnum.ADD, index, t2.head), index + 1)
-        val pos2 = aux(t1.tail, t2, diffs :+ DifferenceFile(DiffEnum.DELETE, index, t1.head), index + 1)
+        val pos1 = aux(t1, t2.tail, diffs :+ DifferenceFile(DiffEnum.ADD, diffs.length, t2.head))
+        val pos2 = aux(t1.tail, t2, diffs :+ DifferenceFile(DiffEnum.DELETE, diffs.length, t1.head))
+
         if (pos1.length < pos2.length) pos1 else pos2
       }
     }
 
-    aux(text1, text2, Seq(), 0);
+    aux(text1, text2, Seq());
   }
 
 

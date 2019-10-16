@@ -42,4 +42,8 @@ object UJson {
     val ser = Source.fromFile(file.pathAsString).getLines.mkString
     parse(ser)
   }
+
+  def fileToSeqString(file: File): Seq[String] = {
+    Source.fromFile(file.pathAsString).getLines.toSeq
+  }
 }

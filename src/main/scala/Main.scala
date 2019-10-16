@@ -1,4 +1,4 @@
-import Commands.{Add, Status}
+import Commands.{Add, Diff, Status}
 import Commands.Commit.Commit
 import Commands.Init.Init
 import better.files.File
@@ -15,13 +15,12 @@ object Main extends App {
   } else {
     val command = args.head
 
-
-
     command match {
       case "init" => Init.initRepo(dirAct)
       case "add" => Add.add(args.tail, dirAct)
       case "commit" => Commit.commit(args.tail, dirAct)
       case "status" => Status.status(dirAct)
+      case "diff" => Diff.diff(dirAct)
       case _ => println("sgit: '" + command + "' is not a sgit command.")
     }
   }

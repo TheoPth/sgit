@@ -2,7 +2,7 @@ package Utils.MoveDir
 
 import java.nio.file.{Path, Paths}
 
-import Commands.Init.Init
+import Commands.Init
 import better.files.File
 import org.scalatest.FunSuite
 

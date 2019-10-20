@@ -1,7 +1,7 @@
 package Utils.Difference
 import java.nio.file.Paths
 
-import Commands.Init.Init
+import Commands.Init
 import better.files.File
 import org.scalatest.FunSuite
 

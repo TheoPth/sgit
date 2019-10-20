@@ -1,22 +1,21 @@
 package Commands
 
 import Utils.Difference.{DiffEnum, Difference, DifferenceDir}
-import Utils.JSON.URef
-import Utils.MoveDir.Sdir
+import Utils.JSON.{ORef, UJson, URef}
 import better.files.File
 import DiffEnum._
+import Utils.MoveDir.Sdir
 
 object Status {
 
   def status(dirAct: File) : Unit = {
-
     val WD = Sdir.getWD(dirAct)
     println(makeStatus(WD))
   }
 
   def makeStatus(repo: File) : String = {
-    val ref = Sdir.getRef(repo)
-    val branchName = URef.getCurrentBranchName(ref)
+    val oRef = UJson.readDeserializedJson[ORef](Sdir.getRef(repo))
+    val branchName = URef.getCurrentBranchName(oRef)
     val commit = Sdir.getOptHeadCommit(repo)
 
     // Retrieve diffs not COMMITED
@@ -32,7 +31,7 @@ object Status {
 
     var noCommit: String = ""
     if (commit.isEmpty) {
-      noCommit = "No commits yet"
+      noCommit = "No commits yet\n"
     }
 
     // Retrieve diffs no STAGED (in red)

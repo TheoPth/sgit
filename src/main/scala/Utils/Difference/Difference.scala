@@ -2,10 +2,7 @@ package Utils.Difference
 
 import java.nio.file.{Path, Paths}
 
-import Utils.Difference.Difference.diffDirectoriesAddModify
 import better.files.File
-import org.json4s.native.Json
-
 import scala.io.Source
 
 case class DifferenceFile(diff: DiffEnum.Value, index: Int, content: String) {}

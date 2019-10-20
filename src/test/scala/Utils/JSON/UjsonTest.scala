@@ -1,80 +1,25 @@
 package Utils.JSON
 
-import Commands.Init.Init
-import Utils.Difference.{DiffEnum, DifferenceDir}
+import Commands.Init
 import Utils.MoveDir.Sdir
+import Utils.archiSgit.{OCommit, UCommit}
 import better.files.File
 import org.scalatest.FunSuite
 
 class UjsonTest extends FunSuite {
-  test("serializeSeqDifferenceDir - No diff in seq") {
-    val diffs = Seq()
-    val ser = UJson.serializeSeqDifferenceDir(diffs)
-    val res = UJson.deserializeSeqDifferenceDir(ser)
+  test("serialize/deserialize - should be the same object") {
+    val commit = OCommit("prev", "mess", "me", "auj", Seq(""), "hash")
+    val commmit2 = UJson.deserializeT[OCommit](UJson.serializeT[OCommit](commit))
+    assert(commit == commmit2)
 
-    assert(res === diffs)
-  }
-
-  test("serializeSeqDifferenceDir - One in seq") {
-    val diffs = Seq(DifferenceDir("hello.txt", DiffEnum.ADD));
-    val ser = UJson.serializeSeqDifferenceDir(diffs)
-    val res = UJson.deserializeSeqDifferenceDir(ser)
-
-    assert(res === diffs)
-  }
-
-
-  test("write/read SerializeSeqDifferenceDir - One in seq") {
-    val dirTestPath = System.getProperty("user.dir") + "/../jsonTest";
-    val dirTest = File (dirTestPath).createIfNotExists(true)
-
-    val jsonFile = File(dirTestPath + "/save.json").createIfNotExists()
-
-    val diffs = Seq(DifferenceDir("hello.txt", DiffEnum.ADD));
-    UJson.writeSerializeSeqDifferenceDir(diffs, jsonFile)
-    val res = UJson.readDeserializeSeqDifferenceDir(jsonFile)
-
-    assert(res === diffs)
-    dirTest.delete()
-  }
-
-  test("write/read SerializeSeqDifferenceDir - no diff") {
-    val dirTestPath = System.getProperty("user.dir") + "/../jsonTest";
-    val dirTest = File (dirTestPath).createIfNotExists(true)
-
-    val jsonFile = File(dirTestPath + "/save.json").createIfNotExists()
-
-    val diffs = Seq();
-    UJson.writeSerializeSeqDifferenceDir(diffs, jsonFile)
-    val res = UJson.readDeserializeSeqDifferenceDir(jsonFile)
-
-    assert(res === diffs)
-    dirTest.delete()
-  }
-
-  test("write/read SerializeSeqDifferenceDir - several diffs") {
-    val dirTestPath = System.getProperty("user.dir") + "/../jsonTest";
-    val dirTest = File (dirTestPath).createIfNotExists(true)
-
-    val jsonFile = File(dirTestPath + "/save.json").createIfNotExists()
-
-    val diffs = Seq(DifferenceDir("hello.txt", DiffEnum.ADD),
-      DifferenceDir("hello.txt", DiffEnum.DELETE),
-      DifferenceDir("hello.txt", DiffEnum.MODIFY));
-    UJson.writeSerializeSeqDifferenceDir(diffs, jsonFile)
-    val res = UJson.readDeserializeSeqDifferenceDir(jsonFile)
-
-    assert(res === diffs)
-
-    dirTest.delete()
   }
 
   test("getCurrentBranchName - Retrieve name of current branch") {
     val dirTestPath = System.getProperty("user.dir") + "/../jsonTest";
     val dirTest = File (dirTestPath).createIfNotExists(true)
     Init.init(dirTest);
-
-    assert(URef.getCurrentBranchName(Sdir.getRef(dirTest)) == "master");
+    val ref = UJson.readDeserializedJson[ORef]( Sdir.getRef(dirTest))
+    assert(URef.getCurrentBranchName(ref) == "master");
     dirTest.delete()
   }
 
@@ -82,9 +27,9 @@ class UjsonTest extends FunSuite {
     val dirTestPath = System.getProperty("user.dir") + "/../jsonTest";
     val dirTest = File (dirTestPath).createIfNotExists(true)
     Init.init(dirTest);
-    val fRef = Sdir.getRef(dirTest)
 
-    val hCommit = URef.getHashCurrentCommit(fRef)
+    val ref = UJson.readDeserializedJson[ORef](Sdir.getRef(dirTest))
+    val hCommit = URef.getHashCurrentCommit(ref)
     assert(hCommit == "")
 
     dirTest.delete()
@@ -93,13 +38,15 @@ class UjsonTest extends FunSuite {
   test("changeCurrentCommit - Add new commit on a branch, should change the pointer") {
     val dirTestPath = System.getProperty("user.dir") + "/../jsonTest";
     val dirTest = File (dirTestPath).createIfNotExists(true)
-    Init.init(dirTest);
+    Init.init(dirTest)
+
     val fRef = Sdir.getRef(dirTest)
 
-    URef.changeCurrentCommit("Lenouveauxhash", fRef)
-    val hCommit = URef.getHashCurrentCommit(fRef)
+    val ref = UJson.readDeserializedJson[ORef]( Sdir.getRef(dirTest))
+    val nref = URef.changeCurrentCommit("Lenouveauxhash", ref)
+
+    val hCommit = URef.getHashCurrentCommit(nref)
     dirTest.delete()
     assert(hCommit == "Lenouveauxhash");
   }
-
 }

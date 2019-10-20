@@ -7,7 +7,7 @@ scalaVersion := "2.13.1"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.8"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 
-target in assembly := file("../testSgit")
+target in assembly := file("./jar")
 mainClass in assembly := Some("Main")
 assemblyJarName in assembly := "sgit.jar"
 

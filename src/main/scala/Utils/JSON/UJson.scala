@@ -6,44 +6,38 @@ import org.json4s.JsonAST.JValue
 import org.json4s.NoTypeHints
 import org.json4s.native.{Json, Serialization}
 import org.json4s.native.Serialization.{read, write}
-import org.json4s.native.JsonMethods.{parse, render, compact}
+import org.json4s.native.JsonMethods.{compact, parse, render}
+
 import scala.io.Source
 
 case class DifferenceDirs(listDiff: Seq[DifferenceDir])
 object UJson {
   implicit val formats = Serialization.formats(NoTypeHints) + new org.json4s.ext.EnumSerializer(DiffEnum)
 
-  def writeSerializeSeqDifferenceDir(seqDiffs: Seq[DifferenceDir], file: File): Unit = {
-    file.write(serializeSeqDifferenceDir(seqDiffs))
+  // ALL
+  def serializeT[T: Manifest](json: T): String = {
+    write(json)
   }
 
-  def readDeserializeSeqDifferenceDir(file: File): Seq[DifferenceDir] = {
+  def deserializeT[T: Manifest](obj: String): T = {
+    read[T](obj)
+  }
+
+  def readJson(file: File) : JValue = {
     val ser = Source.fromFile(file.pathAsString).getLines.mkString
-    deserializeSeqDifferenceDir(ser)
-  }
-
-  def serializeSeqDifferenceDir(seqDiffs: Seq[DifferenceDir]): String = {
-    write(DifferenceDirs(seqDiffs))
-  }
-
-  def deserializeSeqDifferenceDir(seqDiffs: String): Seq[DifferenceDir] = {
-    read[DifferenceDirs](seqDiffs).listDiff
-  }
-
-  def writeJson(json: JValue, file: File): Unit = {
-    file.write(compact(render(json)))
+    parse(ser)
   }
 
   def writeSerializedJson(json: String, file: File) : Unit = {
     file.write(json)
   }
 
-  def readDeserializedJson(file: File) : JValue = {
-    val ser = Source.fromFile(file.pathAsString).getLines.mkString
-    parse(ser)
+  def writeJson[T: Manifest](json: T, file: File) : Unit = {
+    file.write(serializeT[T](json))
   }
 
-  def fileToSeqString(file: File): Seq[String] = {
-    Source.fromFile(file.pathAsString).getLines.toSeq
+  def readDeserializedJson[T: Manifest](file: File) : T = {
+    val ser = Source.fromFile(file.pathAsString).getLines.mkString
+    deserializeT[T](ser)
   }
 }

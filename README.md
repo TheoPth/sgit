@@ -2,7 +2,7 @@
 
 # installation
 
-Clone the repository : git clone git clone https://www.github.com/theopth/sgit
+Clone the repository : git clone https://www.github.com/theopth/sgit
 
 Move to root of the folder: cd sgit
 

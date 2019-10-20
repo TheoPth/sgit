@@ -13,7 +13,7 @@ object Log {
     val repo = Sdir.getWD(dirAct)
     args match {
       case Seq() => print(makeLog("", repo))
-      case arg if arg == "--stat"=> print(makeLog(arg.head, repo))
+      case Seq(arg) if arg == "--stat" || arg == "-p" => print(makeLog(args.head, repo))
       case _ => println("See usage")
     }
   }

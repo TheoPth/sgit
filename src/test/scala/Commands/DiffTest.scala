@@ -28,6 +28,7 @@ class DiffTest extends FunSuite {
     val f2 = File(dirTestPath + "/f2").createIfNotExists().overwrite("")
 
     val diffs = Difference.diffFiles(f1, f2)
+    println(diffs)
     dirTest.delete()
     assert (Diff.findSreen(0, diffs) == Some(List(0, 1)))
   }

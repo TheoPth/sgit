@@ -13,7 +13,7 @@ object Branch {
     args match {
       case Seq(arg) if arg.equals("-av") => print(branchAv(repo))
       case Seq(nameBranch) => newBranch(nameBranch, repo)
-      case _ => "See usage"
+      case _ => println("See usage")
     }
   }
 

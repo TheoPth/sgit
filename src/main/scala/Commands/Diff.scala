@@ -73,6 +73,7 @@ object Diff {
   return the cut and the reste of the differenceFile
    */
   def findSreen(begin: Int, differenceFiles: Seq[DifferenceFile]) : Option[Seq[Int]] = {
+
     def aux(first: Int, cur: Int, lastModif: Int) : Option[Seq[Int]] = {
       val length = cur - first
 

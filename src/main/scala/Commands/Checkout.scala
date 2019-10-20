@@ -72,7 +72,7 @@ object Checkout {
 
     // Move pointer
 
-    // NO TIME 
+    // NO TIME
 
   }
 }

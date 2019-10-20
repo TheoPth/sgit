@@ -14,11 +14,14 @@ object Difference {
   One difference between files is stored as Difference (class)
    */
   def diffFiles (f1: File, f2: File) : Seq[DifferenceFile] = {
+
+
     val text1 = Source.fromFile(f1.pathAsString).getLines.toSeq
     val text2 = Source.fromFile(f2.pathAsString).getLines.toSeq
 
     diffSeqString(text1, text2)
   }
+
 
   def optDiffFile(file1: Option[File], file2 : Option[File]): Seq[DifferenceFile] = {
     (file1, file2) match {

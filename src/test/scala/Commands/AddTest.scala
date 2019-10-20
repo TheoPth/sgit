@@ -168,7 +168,7 @@ class AddTest extends FunSuite {
     File(dirTestPath + "/hello.txt").createIfNotExists().overwrite("hello");
 
     val args = Seq("hello.txt")
-    Add.add(args, dirTest);
+    Add.makeAdd(args, dirTest);
 
     assert(File(dirTestPath + "/.sgit/SA/hello.txt").exists == true)
 
@@ -184,7 +184,7 @@ class AddTest extends FunSuite {
     File(dirTestPath + "/dir1/dir2/hello.txt").createIfNotExists().overwrite("hello");
 
     val args = Seq("dir1/dir2/hello.txt")
-    Add.add(args, dirTest);
+    Add.makeAdd(args, dirTest);
 
     val assertBool: Boolean = File(dirTestPath + "/.sgit/SA/dir1/dir2/hello.txt").exists == true
 

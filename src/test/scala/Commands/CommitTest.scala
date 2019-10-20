@@ -21,7 +21,7 @@ class CommitTest extends FunSuite {
     File(dirTestPath + "/hello.txt").createIfNotExists().overwrite("Hello.txt")
 
     var args = Seq("hello.txt")
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
 
     var log = Commit.makeCommit("Premier commit", dirTest)
 
@@ -39,7 +39,7 @@ class CommitTest extends FunSuite {
     File(dirTestPath + "/hello2.txt").createIfNotExists().overwrite("Hello.txt")
 
     args = Seq("hello2.txt")
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
     Commit.makeCommit("Deuxième commit", dirTest)
     val commit2: File = Sdir.getCommitDir(dirTest).children.toSeq.head
     val ref = UJson.readDeserializedJson[ORef]( Sdir.getRef(dirTest))
@@ -58,7 +58,7 @@ class CommitTest extends FunSuite {
     File(dirTestPath + "/src/hello.txt").createIfNotExists().overwrite("Hello.txt")
 
     val args = Seq("src/hello.txt")
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
 
     val log = Commit.makeCommit("Premier commit", dirTest)
 
@@ -74,7 +74,7 @@ class CommitTest extends FunSuite {
     File(dirTestPath + "/src").createIfNotExists(true)
 
     val args = Seq()
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
 
     val log = Commit.makeCommit("Premier commit", dirTest)
     assert(log === "nothing to commit, working tree clean");

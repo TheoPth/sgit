@@ -45,7 +45,7 @@ class StatusTest extends FunSuite{
 
     val f = File(dirTestPath + "/hello").createIfNotExists().overwrite("hello");
 
-    Add.add(Seq("hello"), dirTest)
+    Add.makeAdd(Seq("hello"), dirTest)
 
     f.overwrite("HELLO")
 
@@ -62,7 +62,7 @@ class StatusTest extends FunSuite{
 
     val f = File(dirTestPath + "/hello").createIfNotExists().overwrite("hello");
 
-    Add.add(Seq("hello"), dirTest)
+    Add.makeAdd(Seq("hello"), dirTest)
 
     val s = Status.unstagged(dirTest)
 
@@ -78,7 +78,7 @@ class StatusTest extends FunSuite{
     val f = File(dirTestPath + "/hello").createIfNotExists().overwrite("hello");
     val args = Seq("hello")
 
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
 
     val s = Status.uncommited(dirTest)
 
@@ -96,7 +96,7 @@ class StatusTest extends FunSuite{
 
     val args = Seq("helloDir")
 
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
 
     val s = Status.uncommited(dirTest)
 
@@ -112,12 +112,12 @@ class StatusTest extends FunSuite{
     val f = File(dirTestPath + "/hello").createIfNotExists().overwrite("hello");
     val args = Seq("hello")
 
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
     Commit.makeCommit("Premier commit", dirTest)
 
     f.overwrite("HELLO")
 
-    Add.add(args, dirTest)
+    Add.makeAdd(args, dirTest)
 
     val s = Status.uncommited(dirTest)
 

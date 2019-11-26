@@ -120,6 +120,7 @@ object Diff {
        |""".stripMargin
   }
 
+
   def computeHeading(begin: Int, end: Int, diffs: Seq[DifferenceFile]): String = {
     val debFile1 = diffs.count(diff => (diff.diff == EQUALS || diff.diff == ADD) && diff.index >= 0 && diff.index < begin) + 1
     val longFile1 = diffs.count(diff => (diff.diff == EQUALS || diff.diff == ADD) && (begin <= diff.index && diff.index <= end))

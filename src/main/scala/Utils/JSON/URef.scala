@@ -1,9 +1,6 @@
 package Utils.JSON
 
 import Utils.Difference.DiffEnum
-import Utils.MoveDir.Sdir
-import Utils.archiSgit.{OCommit, UCommit}
-import better.files.File
 import org.json4s.NoTypeHints
 import org.json4s.native.Serialization
 
@@ -21,7 +18,8 @@ object URef {
 
   def getHashCurrentCommit(ref: ORef) : String = {
     val nameBranch = getCurrentBranchName(ref)
-    ref.branchs.filter(branch => branch.name == nameBranch).map(branch => branch.ref)(0)
+    val tabBranch = ref.branchs.filter(branch => branch.name == nameBranch).map(branch => branch.ref)
+    tabBranch(0)
   }
 
   def getCurrentBranchName(fRef: ORef) : String = {

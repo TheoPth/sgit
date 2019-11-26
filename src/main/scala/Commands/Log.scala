@@ -29,12 +29,13 @@ object Log {
 
       commits match {
         case Seq (last) => {
-          var res = ""
+          var restmp = ""
           File.usingTemporaryDirectory() {tmp => {
-            res = commitsToLog(Seq(), res + commitToLog(last, File(last.pathAsString + "/src"), tmp, arg))
+            restmp = commitsToLog(Seq(), res + commitToLog(last, File(last.pathAsString + "/src"), tmp, arg))
           }}
+          restmp
         }
-          res
+
         case first +: tail => commitsToLog(tail, res + commitToLog(first, File(first.pathAsString + "/src"), File(tail.head.pathAsString + "/src"),  arg))
         case _ => res
       }
